@@ -107,7 +107,7 @@ def generate_test_methods(cls, stream):
                 if len(string) > 1000:
                     args.append('...')
                 else:
-                    args.append(repr(v))
+                    args.append(string)
 
             mname = method.__name__
             if mname.startswith("_test"):
@@ -167,6 +167,20 @@ class TestContainer(object):
         cls.dependency_names = CaseInsensitiveDict()
         # tuple of (prev_name, include, name); prev_name for case sensitivity
         cls.previous_package_names = CaseInsensitiveDict()
+
+    # Default packages for ST2 and ST3 are largely the same,
+    # except for Pascal and Rust
+    # which only ship in ST3
+    default_packages = (
+        'ActionScript', 'AppleScript', 'ASP', 'Batch File',
+        'C#', 'C++', 'Clojure', 'Color Scheme - Default', 'CSS', 'D', 'Default',
+        'Diff', 'Erlang', 'Go', 'Graphviz', 'Groovy', 'Haskell', 'HTML', 'Java',
+        'JavaScript', 'Language - English', 'LaTeX', 'Lisp', 'Lua', 'Makefile',
+        'Markdown', 'Matlab', 'Objective-C', 'OCaml', 'Pascal', 'Perl', 'PHP',
+        'Python', 'R', 'Rails', 'Regular Expressions', 'RestructuredText',
+        'Ruby', 'Rust', 'Scala', 'ShellScript', 'SQL', 'TCL', 'Text', 'Textile',
+        'Theme - Default', 'Vintage', 'XML', 'YAML'
+    )
 
     rel_b_reg = r'''^ (https:// github\.com/ [^/]+/ [^/]+
                       |https:// bitbucket\.org/ [^/]+/ [^/]+
@@ -296,16 +310,26 @@ class TestContainer(object):
         for k, v in data.items():
             self.enforce_key_types_map(k, v, self.package_key_types_map)
 
-            if k == 'donate' and v is None:
-                # Allow "removing" the donate url that is added by "details"
-                continue
-            elif k in ('homepage', 'readme', 'issues', 'donate', 'buy'):
-                self.assertRegex(v, '^https?://')
-
-            elif k == 'details':
+            if k == 'details':
                 self.assertRegex(v, self.package_details_regex,
                                  'The details url is badly formatted or '
                                  'invalid')
+
+            elif k == 'donate' and v is None:
+                # Allow "removing" the donate url that is added by "details"
+                continue
+
+            elif k == 'labels':
+                for label in v:
+                    self.assertNotIn(",", label,
+                                     "Multiple labels should not be in the "
+                                     "same string")
+
+                    # self.assertEqual(label, label.lower(),
+                    #                  "Label name must be lowercase")
+
+                self.assertCountEqual(v, list(set(v)),
+                                      "Specifying the same label multiple times is redundant")
 
             elif k == 'previous_names':
                 # Test if name is unique, against names and previous_names.
@@ -325,6 +349,9 @@ class TestContainer(object):
                             (prev_name, include, name)
                         )
 
+            elif k in ('homepage', 'readme', 'issues', 'donate', 'buy'):
+                self.assertRegex(v, '^https?://')
+
         # Test for invalid characters (on file systems)
         # Invalid on Windows (and sometimes problematic on UNIX)
         self.assertNotRegex(name, r'[/?<>\\:*|"\x00-\x19]',
@@ -333,6 +360,8 @@ class TestContainer(object):
         # Invalid on OS X (or more precisely: hidden)
         self.assertFalse(name.startswith('.'), 'Package names may not start '
                                                'with a dot')
+
+        self.assertNotIn(name, self.default_packages)
 
         if 'details' not in data:
             for key in ('name', 'homepage', 'author', 'releases'):
@@ -362,8 +391,10 @@ class TestContainer(object):
                 self.assertFalse(v.startswith('.'))
 
             elif k == 'load_order':
-                self.assertRegex(v, '^\d\d$', '"load_order" must be a two '
-                                              'digit string')
+                self.assertRegex(v, r'^\d\d$', '"load_order" must be a two '
+                                               'digit string')
+        for key in ('author', 'releases', 'issues', 'description', 'load_order'):
+            self.assertIn(key, data, '%r is required for dependencies' % key)
 
     pck_release_key_types_map = {
         'base': str_cls,
@@ -393,13 +424,14 @@ class TestContainer(object):
         if main_repo:
             if dependency:
                 condition = (
-                    'tags' in data or 'branch' in data
+                    'base' in data
+                    and ('tags' in data or 'branch' in data)
                     or ('sha256' in data
                         and ('url' not in data
                              or data['url'].startswith('http://')))
                 )
                 self.assertTrue(condition,
-                                'A release must have a "tags" key or "branch" key '
+                                'A release must have a "base" and a "tags" or "branch" key '
                                 'if it is in the main repository. For custom '
                                 'releases, a custom repository.json file must be '
                                 'hosted elsewhere. The only exception to this rule '
@@ -441,7 +473,7 @@ class TestContainer(object):
                       'A sublime text version selector is required')
 
         self.assertFalse(('tags' in data and 'branch' in data),
-                         'A release must have a only one of the "tags" or '
+                         'A release must have only one of the "tags" or '
                          '"branch" keys.')
 
         # Test keys values
@@ -469,11 +501,12 @@ class TestContainer(object):
                                  'invalid')
 
             elif k == 'sublime_text':
-                self.assertRegex(v, '^(\*|<=?\d{4}|>=?\d{4})$',
-                                 'sublime_text must be `*` or of the form '
-                                 '<relation><version> '
+                self.assertRegex(v, r'^(\*|<=?\d{4}|>=?\d{4}|\d{4} - \d{4})$',
+                                 'sublime_text must be `*`, of the form '
+                                 '`<relation><version>` '
                                  'where <relation> is one of {<, <=, >, >=} '
-                                 'and <version> is a 4 digit number')
+                                 'and <version> is a 4 digit number, '
+                                 'or of the form `<version> - <version>`')
 
             elif k == 'platforms':
                 if isinstance(v, str_cls):
@@ -481,6 +514,17 @@ class TestContainer(object):
                 for plat in v:
                     self.assertRegex(plat,
                                      r"^(\*|(osx|linux|windows)(-x(32|64))?)$")
+
+                self.assertCountEqual(v, list(set(v)),
+                                      "Specifying the same platform multiple times is redundant")
+
+                if (("osx-x32" in v and "osx-x64" in v) or
+                    ("windows-x32" in v and "windows-x64" in v) or
+                    ("linux-x32" in v and "linux-x64" in v)):
+                    self.fail("Specifying both x32 and x64 architectures is redundant")
+
+                self.assertFalse(set(["osx", "windows", "linux"]) == set(v),
+                                 '"osx, windows, linux" are similar to (and should be replaced by) "*"')
 
             elif k == 'date':
                 self.assertRegex(v, r"^\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d$")
@@ -573,11 +617,11 @@ class TestContainer(object):
                 except Exception as e:
                     yield cls._fail("Downloading %s failed" % path, e)
                     return
-                source = source.decode("utf-8", 'replace')
+                source = source.decode("utf-8", 'strict')
             else:
                 try:
                     with _open(path) as f:
-                        source = f.read().decode('utf-8', 'replace')
+                        source = f.read().decode('utf-8', 'strict')
                 except Exception as e:
                     yield cls._fail("Opening %s failed" % path, e)
                     return
@@ -677,7 +721,7 @@ class DefaultChannelTests(TestContainer, unittest.TestCase):
     def pre_generate(cls):
         if not hasattr(cls, 'j'):
             with _open('channel.json') as f:
-                cls.source = f.read().decode('utf-8', 'replace')
+                cls.source = f.read().decode('utf-8', 'strict')
                 cls.j = json.loads(cls.source)
 
             from collections import defaultdict
@@ -746,7 +790,7 @@ class DefaultRepositoryTests(TestContainer, unittest.TestCase):
     def pre_generate(cls):
         if not hasattr(cls, 'j'):
             with _open('repository.json') as f:
-                cls.source = f.read().decode('utf-8', 'replace')
+                cls.source = f.read().decode('utf-8', 'strict')
                 cls.j = json.loads(cls.source)
 
     def test_repository_keys(self):
@@ -770,10 +814,10 @@ class DefaultRepositoryTests(TestContainer, unittest.TestCase):
         for include in cls.j['includes']:
             try:
                 with _open(include) as f:
-                    contents = f.read().decode('utf-8', 'replace')
+                    contents = f.read().decode('utf-8', 'strict')
                 data = json.loads(contents)
             except Exception as e:
-                yield cls._fail("Error while reading %r" % include, e)
+                yield cls._fail("strict while reading %r" % include, e)
                 continue
 
             # `include` is for output during tests only

@@ -2,11 +2,45 @@
 	"schema_version": "3.0.0",
 	"packages": [
 		{
+			"name": "q KDB",
+			"details": "https://github.com/komsit37/sublime-q",
+			"labels": ["repl", "language syntax", "completion", "build system", "docs", "q", "kdb"],
+			"releases": [
+				{
+					"sublime_text": ">=3000",
+					"tags": true,
+					"platforms": ["osx-x64", "windows-x64", "linux-x64"]
+				}
+			]
+		},
+		{
+			"name": "qasm_highlighting",
+			"details": "https://github.com/gtaifu/qasm_highlighting",
+			"labels": ["language syntax"],
+			"releases": [
+				{
+					"sublime_text": ">=3103",
+					"tags": true
+				}
+			]
+		},
+		{
 			"name": "Qiita for Sublime",
 			"details": "https://github.com/blueplanet/sublime-qiita",
 			"releases": [
 				{
 					"sublime_text": ">=3000",
+					"tags": true
+				}
+			]
+		},
+		{
+			"name": "QLSyntax",
+			"details": "https://github.com/EdoDodo/QLSyntax",
+			"labels": ["language syntax"],
+			"releases": [
+				{
+					"sublime_text": ">=3084",
 					"tags": true
 				}
 			]
@@ -25,6 +59,17 @@
 			"name": "QML",
 			"details": "https://github.com/skozlovf/Sublime-QML",
 			"labels": ["language syntax", "snippets"],
+			"releases": [
+				{
+					"sublime_text": "*",
+					"tags": true
+				}
+			]
+		},
+		{
+			"name": "QNav",
+			"details": "https://github.com/ta-tikoma/QNav",
+			"labels": ["navigation", "files navigation"],
 			"releases": [
 				{
 					"sublime_text": "*",
@@ -76,19 +121,20 @@
 			]
 		},
 		{
-			"name": "QuarkPHP",
-			"details": "https://github.com/sahibalejandro/quark-php-sublime",
+			"name": "Quartz-Syntax",
+			"details": "https://github.com/contradictioned/quartz-syntax",
+			"labels": ["language syntax"],
 			"releases": [
 				{
-					"sublime_text": "<3000",
-					"branch": "master"
+					"sublime_text": "*",
+					"tags": true
 				}
 			]
 		},
 		{
-			"name": "Quartz-Syntax",
-			"details": "https://github.com/contradictioned/quartz-syntax",
-			"labels": ["language syntax"],
+			"name": "Quasar Snippets",
+			"details": "https://github.com/bunya017/sublime-text-quasar-snippets",
+			"labels": ["snippets"],
 			"releases": [
 				{
 					"sublime_text": "*",
@@ -159,8 +205,20 @@
 			]
 		},
 		{
+			"name": "QuickEdit",
+			"details": "https://github.com/gamcoh/QuickEdit",
+			"labels": ["Html", "Css", "php", "Quick", "Edition"],
+			"releases": [
+				{
+					"sublime_text": "*",
+					"tags": true,
+					"platforms": "*"
+				}
+			]
+		},
+		{
 			"name": "QuickGotoAnything",
-			"details": "https://github.com/lite3/Sublime-QuickGotoAnything",
+			"details": "https://github.com/litefeel/Sublime-QuickGotoAnything",
 			"releases": [
 				{
 					"sublime_text": "*",
@@ -179,9 +237,8 @@
 			]
 		},
 		{
-			"name": "QuickMail",
-			"previous_names": ["Oauth Mail"],
-			"details": "https://github.com/divinites/oauth-mail",
+			"name": "QuickOpen",
+			"details": "https://github.com/zsytssk/QuickOpen",
 			"releases": [
 				{
 					"sublime_text": ">=3000",
@@ -190,8 +247,8 @@
 			]
 		},
 		{
-			"name": "QuickOpen",
-			"details": "https://github.com/zsytssk/QuickOpen",
+			"name": "QuickPanelEnhanced",
+			"details": "https://github.com/jaytiar/SublimeQuickPanelEnhanced",
 			"releases": [
 				{
 					"sublime_text": ">=3000",
@@ -205,6 +262,17 @@
 				{
 					"sublime_text": "<3000",
 					"branch": "master"
+				}
+			]
+		},
+		{
+			"name": "QuickPuTTY",
+			"details": "https://github.com/Nikita-Panyuhin/QuickPuTTY",
+			"releases": [
+				{
+					"sublime_text": ">=3000",
+					"platforms": ["windows", "linux"],
+					"tags": true
 				}
 			]
 		},
@@ -230,6 +298,16 @@
 			]
 		},
 		{
+			"name": "QuickReplaceAtCursor",
+			"details": "https://bitbucket.org/JorisL/quickreplaceatcursor",
+			"releases": [
+				{
+					"sublime_text": ">=3000",
+					"tags": true
+				}
+			]
+		},
+		{
 			"name": "QuickSearchEnhanced",
 			"details": "https://github.com/shagabutdinov/sublime-quick-search-enhanced",
 			"donate": "https://github.com/shagabutdinov/sublime-enhanced/blob/master/readme-donations.md",
@@ -238,6 +316,18 @@
 				{
 					"sublime_text": "*",
 					"branch": "master"
+				}
+			]
+		},
+		{
+			"name": "QuickSettings",
+			"details": "https://github.com/evandrocoan/QuickSettings",
+			"author": ["klorenz", "evandrocoan"],
+			"labels": ["preferences", "settings"],
+			"releases": [
+				{
+					"sublime_text": "*",
+					"tags": true
 				}
 			]
 		},
